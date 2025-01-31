@@ -36,7 +36,7 @@ defmodule Ragistry.MixProject do
   defp package do
     [
       name: "ragistry",
-      files: ~w(lib .formatter.exs mix.exs README.md),
+      files: ~w(lib mix.exs README.md),
       licenses: ["MPL-2.0"],
       links: %{
         "GitHub" => "https://github.com/hkrutzer/ragistry"
