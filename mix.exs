@@ -27,7 +27,7 @@ defmodule Ragistry.MixProject do
 
   defp deps do
     [
-      {:ra, "~> 2.15"},
+      {:ra, "~> 2.16"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:ex_unit_cluster, "~> 0.7.0", only: :test}
     ]
