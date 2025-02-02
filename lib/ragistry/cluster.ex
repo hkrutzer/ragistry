@@ -1,6 +1,4 @@
 defmodule Ragistry.Cluster do
-  @moduledoc false
-
   use GenServer
   require Logger
 
@@ -8,6 +6,14 @@ defmodule Ragistry.Cluster do
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+  end
+
+  def child_spec(opts) do
+    %{
+      id: opts[:name] || __MODULE__,
+      start: {Ragistry, :start_link, [opts]},
+      type: :supervisor
+    }
   end
 
   def init(opts) do
@@ -33,7 +39,6 @@ defmodule Ragistry.Cluster do
       members ->
         # Join existing cluster through any member
         [existing_member | _] = members -- [self()]
-        # TODO Rename from primary
         existing_node = node(existing_member)
         Logger.debug("Joining existing cluster through #{inspect(existing_member)}")
 

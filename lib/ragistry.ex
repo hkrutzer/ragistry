@@ -29,35 +29,24 @@ defmodule Ragistry do
   processes terminate, maintaining consistency across the cluster.
   """
 
-  @doc """
-  Starts a new registry instance.
-
-  ## Options
-    * `:name` - Required. The name to register the registry under.
-  """
   defdelegate start_link(opts), to: Ragistry.Cluster
-
-  @doc """
-  Registers the current process in the registry under the given key with associated value.
-
-  Returns `:ok` if successful, or `{:error, :already_registered}` if the key is already taken.
-  """
+  defdelegate child_spec(opts), to: Ragistry.Cluster
   defdelegate register(name, key, value), to: Ragistry.Machine
-
-  @doc """
-  Looks up processes registered under the given key.
-
-  Returns a list of tuples containing `{pid, value}` for all matching processes,
-  or an empty list if no process is registered under the given key.
-  """
   defdelegate lookup(name, key), to: Ragistry.Machine
-
-  @doc """
-  Unregisters the current process for the given key.
-
-  Returns `:ok` if successful.
-  """
   defdelegate unregister(name, key), to: Ragistry.Machine
+  defdelegate count(name), to: Ragistry.Machine
+  defdelegate count_match(name, key, pattern, guards \\ []), to: Ragistry.Machine
+  defdelegate count_select(name, spec), to: Ragistry.Machine
+  defdelegate dispatch(name, key, mfa), to: Ragistry.Machine
+  defdelegate keys(name, pid), to: Ragistry.Machine
+  defdelegate match(name, key, pattern, guards \\ []), to: Ragistry.Machine
+  defdelegate meta(name, key), to: Ragistry.Machine
+  defdelegate put_meta(name, key, value), to: Ragistry.Machine
+  defdelegate delete_meta(name, key), to: Ragistry.Machine
+  defdelegate select(name, spec), to: Ragistry.Machine
+  defdelegate unregister_match(name, key, pattern, guards \\ []), to: Ragistry.Machine
+  defdelegate update_value(name, key, value), to: Ragistry.Machine
+  defdelegate values(name, key, pid), to: Ragistry.Machine
 
   @doc false
   defdelegate whereis_name(via), to: Ragistry.Machine
