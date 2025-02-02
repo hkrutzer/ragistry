@@ -1,5 +1,8 @@
 # Ragistry
 
+[![Documentation badge](https://img.shields.io/badge/Hexdocs-ff6900)](https://hexdocs.pm/ragistry/)
+[![Hex.pm badge](https://img.shields.io/badge/hex.pm-informational)](https://hex.pm/packages/ragistry)
+
 A work-in-progress distributed process registry system built on top of the [Ra](https://github.com/rabbitmq/ra) implementation of Raft.
 
 ## Usage
