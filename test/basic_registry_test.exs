@@ -97,12 +97,22 @@ defmodule Ragistry.BasicRegistryTest do
     [{^pid, _}] = Ragistry.lookup(name, "my_counter")
   end
 
-  test "duplicate registration returns error" do
+  test "duplicate registration returns the existing registrant's pid" do
     name = :test_registry2
     {:ok, _pid} = Ragistry.start_link(name: name)
 
     assert :ok == Ragistry.register(name, "key1", "value1")
-    assert {:error, :already_registered} == Ragistry.register(name, "key1", "value1")
+    expected = {:error, {:already_registered, self()}}
+    assert expected == Ragistry.register(name, "key1", "value1")
+
+    task = Task.async(fn -> Ragistry.register(name, "key1", "other_value") end)
+    assert Task.await(task) == expected
+    assert Ragistry.lookup(name, "key1") == [{self(), "value1"}]
+
+    # An empty entry left by unregister has no owner to report.
+    assert Ragistry.unregister(name, "key1") == :ok
+    assert Ragistry.register(name, "key1", "new_value") == :ok
+    assert Ragistry.lookup(name, "key1") == [{self(), "new_value"}]
   end
 
   test "count returns number of registrations" do

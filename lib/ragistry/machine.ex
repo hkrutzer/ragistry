@@ -117,13 +117,13 @@ defmodule Ragistry.Machine do
   # Used by Ragistry.Machine.register/3
   @impl true
   def apply(_meta, {:register, key, pid, value}, %{type: :unique} = state) do
-    case Map.get(state.entries, key) do
-      nil ->
+    case Map.get(state.entries, key, []) do
+      [] ->
         state = put_in(state.entries[key], [{pid, value}])
         {state, :ok, [{:monitor, :process, pid}]}
 
-      _other ->
-        {state, {:error, :already_registered}, []}
+      [{existing_pid, _value}] ->
+        {state, {:error, {:already_registered, existing_pid}}, []}
     end
   end
 
