@@ -1,6 +1,47 @@
 defmodule Ragistry.BasicRegistryTest do
   use ExUnit.Case
 
+  test "unregister_match removes only matching registrations owned by the caller" do
+    name = :test_registry_unregister_match
+    {:ok, _pid} = Ragistry.start_link(name: name, type: :duplicate)
+
+    assert :ok == Ragistry.unregister_match(name, :missing, :_)
+    assert 0 == Ragistry.count(name)
+
+    for value <- [{:score, 1}, {:score, 3}, {:score, 3}, {:other, 3}] do
+      assert :ok == Ragistry.register(name, :shared, value)
+    end
+
+    assert :ok == Ragistry.register(name, :other_key, {:score, 3})
+
+    {:ok, other_pid} =
+      Agent.start_link(fn ->
+        :ok = Ragistry.register(name, :shared, {:score, 3})
+      end)
+
+    try do
+      before = Ragistry.lookup(name, :shared)
+      assert :ok == Ragistry.unregister_match(name, :shared, {:score, :"$1"}, [{:>, :"$1", 10}])
+      assert before == Ragistry.lookup(name, :shared)
+
+      assert :ok == Ragistry.unregister_match(name, :shared, {:score, :"$1"}, [{:>, :"$1", 1}])
+
+      assert Enum.sort(Ragistry.lookup(name, :shared)) ==
+               Enum.sort([{self(), {:score, 1}}, {self(), {:other, 3}}, {other_pid, {:score, 3}}])
+
+      assert :ok == Ragistry.unregister_match(name, :shared, {:score, 1})
+      assert :ok == Ragistry.unregister_match(name, :shared, :_)
+      assert [{other_pid, {:score, 3}}] == Ragistry.lookup(name, :shared)
+      assert [{self(), {:score, 3}}] == Ragistry.lookup(name, :other_key)
+
+      assert :ok == Ragistry.unregister_match(name, :other_key, :_)
+      assert [] == Ragistry.lookup(name, :other_key)
+      assert :ok == Ragistry.register(name, :other_key, :reused)
+    after
+      Agent.stop(other_pid)
+    end
+  end
+
   test "register, lookup and unregister operations" do
     name = :test_registry
     {:ok, _pid} = Ragistry.start_link(name: name)

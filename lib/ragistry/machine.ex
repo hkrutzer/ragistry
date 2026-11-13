@@ -157,6 +157,26 @@ defmodule Ragistry.Machine do
     end
   end
 
+  # Used by Ragistry.Machine.unregister_match/4
+  def apply(_meta, {:unregister_match, key, pattern, guards, pid}, state) do
+    compiled_ms = :ets.match_spec_compile([{{pid, pattern}, guards, [true]}])
+
+    remaining =
+      state.entries
+      |> Map.get(key, [])
+      |> Enum.reject(fn entry ->
+        :ets.match_spec_run([entry], compiled_ms) == [true]
+      end)
+
+    entries =
+      case remaining do
+        [] -> Map.delete(state.entries, key)
+        _ -> Map.put(state.entries, key, remaining)
+      end
+
+    {%{state | entries: entries}, :ok, []}
+  end
+
   # Used by Ragistry.Machine.lookup/2
   def apply(_meta, {:lookup, key}, state) do
     result = Map.get(state.entries, key, [])
