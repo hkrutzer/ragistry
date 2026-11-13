@@ -13,7 +13,7 @@ defmodule Ragistry do
   ## Examples
 
       # Start the registry
-      {:ok, _pid} = Ragistry.start_link(name: :my_registry)
+      {:ok, _pid} = Ragistry.start_link(name: :my_registry, keys: :unique)
 
       # Register a process
       Ragistry.register(:my_registry, "my_key", "my_value")
@@ -29,6 +29,11 @@ defmodule Ragistry do
   processes terminate, maintaining consistency across the cluster.
   """
 
+  @doc """
+  Starts a registry with the given `:name`.
+
+  The `:keys` option is required and must be `:unique` or `:duplicate`.
+  """
   defdelegate start_link(opts), to: Ragistry.Cluster
   defdelegate child_spec(opts), to: Ragistry.Cluster
   defdelegate register(name, key, value), to: Ragistry.Machine

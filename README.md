@@ -9,7 +9,7 @@ A work-in-progress distributed process registry system built on top of the [Ra](
 
 ```elixir
 # Start the registry
-{:ok, _pid} = Ragistry.start_link(name: :my_registry)
+{:ok, _pid} = Ragistry.start_link(name: :my_registry, keys: :unique)
 
 # Register a key-value pair
 :ok = Ragistry.register(:my_registry, "key1", "value1")
@@ -25,8 +25,8 @@ Ragistry works across a cluster of nodes:
 
 ```
 # Start registry on each node in the cluster
-Node1> Ragistry.start_link(name: :distributed_registry)
-Node2> Ragistry.start_link(name: :distributed_registry)
+Node1> Ragistry.start_link(name: :distributed_registry, keys: :unique)
+Node2> Ragistry.start_link(name: :distributed_registry, keys: :unique)
 
 # Registration on one node is visible to all nodes
 Node1> {:ok, pid} = Agent.start_link(

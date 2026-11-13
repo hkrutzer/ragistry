@@ -7,8 +7,13 @@ defmodule Ragistry.RegistryTest do
     node2 = ExUnitCluster.start_node(cluster)
 
     # Start the registry on both nodes
-    ExUnitCluster.call(cluster, node1, Ragistry, :start_link, [[name: :my_registry]])
-    ExUnitCluster.call(cluster, node2, Ragistry, :start_link, [[name: :my_registry]])
+    ExUnitCluster.call(cluster, node1, Ragistry, :start_link, [
+      [name: :my_registry, keys: :unique]
+    ])
+
+    ExUnitCluster.call(cluster, node2, Ragistry, :start_link, [
+      [name: :my_registry, keys: :unique]
+    ])
 
     # Start an Agent with via registration
     {:ok, agent_pid} =
@@ -32,8 +37,13 @@ defmodule Ragistry.RegistryTest do
     node1 = ExUnitCluster.start_node(cluster)
     node2 = ExUnitCluster.start_node(cluster)
 
-    ExUnitCluster.call(cluster, node1, Ragistry, :start_link, [[name: :my_registry]])
-    ExUnitCluster.call(cluster, node2, Ragistry, :start_link, [[name: :my_registry]])
+    ExUnitCluster.call(cluster, node1, Ragistry, :start_link, [
+      [name: :my_registry, keys: :unique]
+    ])
+
+    ExUnitCluster.call(cluster, node2, Ragistry, :start_link, [
+      [name: :my_registry, keys: :unique]
+    ])
 
     test_pid =
       ExUnitCluster.in_cluster(cluster, node1,
@@ -60,7 +70,10 @@ defmodule Ragistry.RegistryTest do
   test "registration visible to newly joined node", %{cluster: cluster} do
     # Start first node and registry
     node1 = ExUnitCluster.start_node(cluster)
-    ExUnitCluster.call(cluster, node1, Ragistry, :start_link, [[name: :my_registry]])
+
+    ExUnitCluster.call(cluster, node1, Ragistry, :start_link, [
+      [name: :my_registry, keys: :unique]
+    ])
 
     # Start and register an Agent on first node
     {:ok, agent_pid} =
@@ -77,7 +90,10 @@ defmodule Ragistry.RegistryTest do
 
     # Start second node and registry after registration
     node2 = ExUnitCluster.start_node(cluster)
-    ExUnitCluster.call(cluster, node2, Ragistry, :start_link, [[name: :my_registry]])
+
+    ExUnitCluster.call(cluster, node2, Ragistry, :start_link, [
+      [name: :my_registry, keys: :unique]
+    ])
 
     # Verify registration is visible on newly joined node
     lookup2 =

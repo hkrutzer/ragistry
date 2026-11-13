@@ -3,13 +3,13 @@ defmodule Ragistry.Machine do
 
   @type state :: %{
           entries: %{term() => [{pid(), term()}]},
-          type: :unique | :duplicate,
+          kind: :unique | :duplicate,
           meta: %{term() => term()}
         }
 
   @impl true
-  def init(%{type: type}) when type in [:unique, :duplicate] do
-    %{entries: %{}, type: type, meta: %{}}
+  def init(%{kind: kind}) when kind in [:unique, :duplicate] do
+    %{entries: %{}, kind: kind, meta: %{}}
   end
 
   def count(name) do
@@ -116,7 +116,7 @@ defmodule Ragistry.Machine do
 
   # Used by Ragistry.Machine.register/3
   @impl true
-  def apply(_meta, {:register, key, pid, value}, %{type: :unique} = state) do
+  def apply(_meta, {:register, key, pid, value}, %{kind: :unique} = state) do
     case Map.get(state.entries, key, []) do
       [] ->
         state = put_in(state.entries[key], [{pid, value}])
@@ -128,7 +128,7 @@ defmodule Ragistry.Machine do
   end
 
   # Used by Ragistry.Machine.register/3
-  def apply(_meta, {:register, key, pid, value}, %{type: :duplicate} = state) do
+  def apply(_meta, {:register, key, pid, value}, %{kind: :duplicate} = state) do
     effects =
       if Map.get(state.entries, key) == nil do
         [{:monitor, :process, pid}]
@@ -313,7 +313,7 @@ defmodule Ragistry.Machine do
   end
 
   # Used by Ragistry.Machine.update_value/3
-  def apply(_meta, {:update_value, key, callback, pid}, %{type: :unique} = state) do
+  def apply(_meta, {:update_value, key, callback, pid}, %{kind: :unique} = state) do
     case Map.get(state.entries, key) do
       [{^pid, old_value}] ->
         new_value = callback.(old_value)

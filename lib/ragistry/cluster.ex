@@ -18,9 +18,9 @@ defmodule Ragistry.Cluster do
 
   def init(opts) do
     name = opts[:name]
-    type = Keyword.get(opts, :type, :unique)
+    kind = Keyword.fetch!(opts, :keys)
     cluster_name = name
-    machine = {:module, Ragistry.Machine, %{type: type}}
+    machine = {:module, Ragistry.Machine, %{kind: kind}}
     pg_scope = name
 
     :pg.start_link(pg_scope)
