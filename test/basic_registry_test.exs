@@ -3,7 +3,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "unregister_match removes only matching registrations owned by the caller" do
     name = :test_registry_unregister_match
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :duplicate)
+    start_supervised!({Ragistry, name: name, keys: :duplicate})
 
     assert :ok == Ragistry.unregister_match(name, :missing, :_)
     assert 0 == Ragistry.count(name)
@@ -44,7 +44,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "register, lookup and unregister operations" do
     name = :test_registry
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :unique)
+    start_supervised!({Ragistry, name: name, keys: :unique})
 
     # Test registration
     assert :ok == Ragistry.register(name, "key1", "value1")
@@ -64,7 +64,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "process exit removes registration" do
     name = :test_registry_exit
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :unique)
+    start_supervised!({Ragistry, name: name, keys: :unique})
 
     task =
       Task.async(fn ->
@@ -85,7 +85,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "via tuple registration" do
     name = TestRegistryVia
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :unique)
+    start_supervised!({Ragistry, name: name, keys: :unique})
 
     # Start a GenServer using the registry for registration
     {:ok, pid} =
@@ -99,7 +99,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "duplicate registration returns the existing registrant's pid" do
     name = :test_registry2
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :unique)
+    start_supervised!({Ragistry, name: name, keys: :unique})
 
     assert :ok == Ragistry.register(name, "key1", "value1")
     expected = {:error, {:already_registered, self()}}
@@ -117,7 +117,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "count returns number of registrations" do
     name = :test_registry_count
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :unique)
+    start_supervised!({Ragistry, name: name, keys: :unique})
 
     assert 0 == Ragistry.count(name)
 
@@ -129,7 +129,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "count counts multiple registrations under the same key" do
     name = :test_registry_duplicate_count
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :duplicate)
+    start_supervised!({Ragistry, name: name, keys: :duplicate})
 
     assert :ok == Ragistry.register(name, :key, :value1)
     assert :ok == Ragistry.register(name, :key, :value2)
@@ -139,7 +139,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "count_match returns number of matches" do
     name = :test_registry_count_match
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :duplicate)
+    start_supervised!({Ragistry, name: name, keys: :duplicate})
 
     # Register some test data with the same key
     value1 = {1, :atom, 1}
@@ -162,7 +162,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "count_select returns number of matches for complex patterns" do
     name = :test_registry_count_select
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :duplicate)
+    start_supervised!({Ragistry, name: name, keys: :duplicate})
 
     # Register test data
     :ok = Ragistry.register(name, "key1", {1, :atom, 1})
@@ -187,7 +187,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "match supports patterns and guards" do
     name = :test_registry_match
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :unique)
+    start_supervised!({Ragistry, name: name, keys: :unique})
 
     value = {1, :atom, 2}
     :ok = Ragistry.register(name, "hello", value)
@@ -206,7 +206,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "keys returns all keys for a pid" do
     name = :test_registry_keys
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :unique)
+    start_supervised!({Ragistry, name: name, keys: :unique})
 
     :ok = Ragistry.register(name, "key1", "value1")
     :ok = Ragistry.register(name, "key2", "value2")
@@ -216,7 +216,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "keys preserves repeated keys for the same registrant in duplicate mode" do
     name = :test_registry_duplicate_keys
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :duplicate)
+    start_supervised!({Ragistry, name: name, keys: :duplicate})
 
     assert :ok == Ragistry.register(name, :c, -28)
     assert :ok == Ragistry.register(name, :c, 9)
@@ -226,7 +226,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "values returns all values for a key and pid" do
     name = :test_registry_values
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :unique)
+    start_supervised!({Ragistry, name: name, keys: :unique})
 
     :ok = Ragistry.register(name, "key1", "value1")
 
@@ -236,7 +236,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "select supports match specifications" do
     name = :test_registry_select
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :unique)
+    start_supervised!({Ragistry, name: name, keys: :unique})
 
     :ok = Ragistry.register(name, "hello", {1, :atom, 1})
     :ok = Ragistry.register(name, "world", {2, :atom, 2})
@@ -255,7 +255,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "update_value modifies existing registration" do
     name = :test_registry_update
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :unique)
+    start_supervised!({Ragistry, name: name, keys: :unique})
 
     :ok = Ragistry.register(name, "counter", 1)
     assert {2, 1} = Ragistry.update_value(name, "counter", &(&1 + 1))
@@ -266,7 +266,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "meta operations work correctly" do
     name = :test_registry_meta
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :unique)
+    start_supervised!({Ragistry, name: name, keys: :unique})
 
     # Test putting and getting meta
     assert :ok == Ragistry.put_meta(name, :counter, 1)
@@ -289,7 +289,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "meta supports different value types" do
     name = :test_registry_meta_types
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :unique)
+    start_supervised!({Ragistry, name: name, keys: :unique})
 
     test_values = [
       {:atom_key, :atom_value},
@@ -309,7 +309,7 @@ defmodule Ragistry.BasicRegistryTest do
 
   test "dispatch executes function for matching processes" do
     name = :test_registry_dispatch
-    {:ok, _pid} = Ragistry.start_link(name: name, keys: :duplicate)
+    start_supervised!({Ragistry, name: name, keys: :duplicate})
 
     # Test dispatch with no registered processes
     fun = fn _ -> raise "should not be called" end

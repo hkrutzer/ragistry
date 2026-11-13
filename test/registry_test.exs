@@ -3,16 +3,18 @@ defmodule Ragistry.RegistryTest do
 
   test "basic registration works", %{cluster: cluster} do
     # Start two nodes in our cluster
-    node1 = ExUnitCluster.start_node(cluster)
-    node2 = ExUnitCluster.start_node(cluster)
+    node1 = start_test_node(cluster)
+    node2 = start_test_node(cluster)
 
     # Start the registry on both nodes
-    ExUnitCluster.call(cluster, node1, Ragistry, :start_link, [
-      [name: :my_registry, keys: :unique]
+    ExUnitCluster.call(cluster, node1, Supervisor, :start_child, [
+      Ragistry.TestSupervisor,
+      {Ragistry, name: :my_registry, keys: :unique}
     ])
 
-    ExUnitCluster.call(cluster, node2, Ragistry, :start_link, [
-      [name: :my_registry, keys: :unique]
+    ExUnitCluster.call(cluster, node2, Supervisor, :start_child, [
+      Ragistry.TestSupervisor,
+      {Ragistry, name: :my_registry, keys: :unique}
     ])
 
     # Start an Agent with via registration
@@ -34,15 +36,17 @@ defmodule Ragistry.RegistryTest do
   end
 
   test "handles process death", %{cluster: cluster} do
-    node1 = ExUnitCluster.start_node(cluster)
-    node2 = ExUnitCluster.start_node(cluster)
+    node1 = start_test_node(cluster)
+    node2 = start_test_node(cluster)
 
-    ExUnitCluster.call(cluster, node1, Ragistry, :start_link, [
-      [name: :my_registry, keys: :unique]
+    ExUnitCluster.call(cluster, node1, Supervisor, :start_child, [
+      Ragistry.TestSupervisor,
+      {Ragistry, name: :my_registry, keys: :unique}
     ])
 
-    ExUnitCluster.call(cluster, node2, Ragistry, :start_link, [
-      [name: :my_registry, keys: :unique]
+    ExUnitCluster.call(cluster, node2, Supervisor, :start_child, [
+      Ragistry.TestSupervisor,
+      {Ragistry, name: :my_registry, keys: :unique}
     ])
 
     test_pid =
@@ -69,10 +73,11 @@ defmodule Ragistry.RegistryTest do
 
   test "registration visible to newly joined node", %{cluster: cluster} do
     # Start first node and registry
-    node1 = ExUnitCluster.start_node(cluster)
+    node1 = start_test_node(cluster)
 
-    ExUnitCluster.call(cluster, node1, Ragistry, :start_link, [
-      [name: :my_registry, keys: :unique]
+    ExUnitCluster.call(cluster, node1, Supervisor, :start_child, [
+      Ragistry.TestSupervisor,
+      {Ragistry, name: :my_registry, keys: :unique}
     ])
 
     # Start and register an Agent on first node
@@ -89,10 +94,11 @@ defmodule Ragistry.RegistryTest do
     assert [{^agent_pid, "value1"}] = lookup1
 
     # Start second node and registry after registration
-    node2 = ExUnitCluster.start_node(cluster)
+    node2 = start_test_node(cluster)
 
-    ExUnitCluster.call(cluster, node2, Ragistry, :start_link, [
-      [name: :my_registry, keys: :unique]
+    ExUnitCluster.call(cluster, node2, Supervisor, :start_child, [
+      Ragistry.TestSupervisor,
+      {Ragistry, name: :my_registry, keys: :unique}
     ])
 
     # Verify registration is visible on newly joined node
@@ -100,5 +106,25 @@ defmodule Ragistry.RegistryTest do
       ExUnitCluster.call(cluster, node2, Ragistry, :lookup, [:my_registry, "test_key"])
 
     assert lookup1 == lookup2
+  end
+
+  defp start_test_node(cluster) do
+    node = ExUnitCluster.start_node(cluster)
+
+    # Load a test-only application without adding another Mix project or .app file.
+    app =
+      {:application, :ragistry_test,
+       vsn: ~c"0.1.0",
+       modules: [Ragistry.TestApplication],
+       registered: [Ragistry.TestSupervisor],
+       applications: [:kernel, :stdlib, :elixir, :ragistry],
+       mod: {Ragistry.TestApplication, []}}
+
+    assert :ok = ExUnitCluster.call(cluster, node, :application, :load, [app])
+
+    assert {:ok, _} =
+             ExUnitCluster.call(cluster, node, Application, :ensure_all_started, [:ragistry_test])
+
+    node
   end
 end

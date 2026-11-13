@@ -1,5 +1,6 @@
 defmodule Ragistry.Machine do
   @behaviour :ra_machine
+  alias Ragistry.Server
 
   @type state :: %{
           entries: %{term() => [{pid(), term()}]},
@@ -13,25 +14,25 @@ defmodule Ragistry.Machine do
   end
 
   def count(name) do
-    server = server_id(name)
+    server = Server.id(name)
     {:ok, count, _} = :ra.process_command(server, {:count})
     count
   end
 
   def count_match(name, key, pattern, guards \\ []) do
-    server = server_id(name)
+    server = Server.id(name)
     {:ok, count, _} = :ra.process_command(server, {:count_match, key, pattern, guards})
     count
   end
 
   def count_select(name, spec) do
-    server = server_id(name)
+    server = Server.id(name)
     {:ok, count, _} = :ra.process_command(server, {:count_select, spec})
     count
   end
 
   def delete_meta(name, key) do
-    server = server_id(name)
+    server = Server.id(name)
     {:ok, :ok, _} = :ra.process_command(server, {:delete_meta, key})
     :ok
   end
@@ -42,55 +43,55 @@ defmodule Ragistry.Machine do
   end
 
   def keys(name, pid) do
-    server = server_id(name)
+    server = Server.id(name)
     {:ok, keys, _} = :ra.process_command(server, {:keys, pid})
     keys
   end
 
   def match(name, key, pattern, guards \\ []) do
-    server = server_id(name)
+    server = Server.id(name)
     {:ok, matches, _} = :ra.process_command(server, {:match, key, pattern, guards})
     matches
   end
 
   def meta(name, key) do
-    server = server_id(name)
+    server = Server.id(name)
     {:ok, value, _} = :ra.process_command(server, {:get_meta, key})
     value
   end
 
   def put_meta(name, key, value) do
-    server = server_id(name)
+    server = Server.id(name)
     {:ok, :ok, _} = :ra.process_command(server, {:put_meta, key, value})
     :ok
   end
 
   def select(name, spec) do
-    server = server_id(name)
+    server = Server.id(name)
     {:ok, results, _} = :ra.process_command(server, {:select, spec})
     results
   end
 
   def unregister_match(name, key, pattern, guards \\ []) do
-    server = server_id(name)
+    server = Server.id(name)
     {:ok, :ok, _} = :ra.process_command(server, {:unregister_match, key, pattern, guards, self()})
     :ok
   end
 
   def update_value(name, key, value) do
-    server = server_id(name)
+    server = Server.id(name)
     {:ok, result, _} = :ra.process_command(server, {:update_value, key, value, self()})
     result
   end
 
   def values(name, key, pid) do
-    server = server_id(name)
+    server = Server.id(name)
     {:ok, values, _} = :ra.process_command(server, {:values, key, pid})
     values
   end
 
   def register(name, key, value) do
-    server = {server_id(name), node()}
+    server = Server.id(name)
 
     case :ra.process_command(server, {:register, key, self(), value}) do
       {:ok, :ok, _} -> :ok
@@ -100,13 +101,13 @@ defmodule Ragistry.Machine do
   end
 
   def unregister(name, key) do
-    server = server_id(name)
+    server = Server.id(name)
     :ra.process_command(server, {:unregister, key, self()})
     :ok
   end
 
   def lookup(name, key) do
-    server = server_id(name)
+    server = Server.id(name)
 
     case :ra.process_command(server, {:lookup, key}) do
       {:ok, entries, _} -> entries
@@ -359,14 +360,5 @@ defmodule Ragistry.Machine do
 
   defp apply_mfa_or_fun(xs, fun) do
     fun.(xs)
-  end
-
-  defp server_id(registry_name) do
-    server_id(registry_name, node())
-  end
-
-  defp server_id(registry_name, node) when is_atom(node) do
-    (Atom.to_string(node) <> "_" <> Atom.to_string(registry_name))
-    |> String.to_atom()
   end
 end

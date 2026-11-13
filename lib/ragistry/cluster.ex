@@ -1,6 +1,7 @@
 defmodule Ragistry.Cluster do
   use GenServer
   require Logger
+  alias Ragistry.Server
 
   @pg_group :cluster_managers
 
@@ -34,7 +35,7 @@ defmodule Ragistry.Cluster do
         Logger.debug("Starting new Ra cluster #{inspect(cluster_name)}")
 
         {:ok, _, _} =
-          :ra.start_cluster(:default, cluster_name, machine, [{server_id(name), node()}])
+          :ra.start_cluster(:default, cluster_name, machine, [Server.id(name)])
 
       members ->
         # Join existing cluster through any member
@@ -45,12 +46,12 @@ defmodule Ragistry.Cluster do
         :ra.start_server(
           :default,
           cluster_name,
-          {server_id(name), node()},
+          Server.id(name),
           machine,
-          [{server_id(name, existing_node), existing_node}]
+          [Server.id(name, existing_node)]
         )
 
-        :ra.add_member({server_id(name, existing_node), existing_node}, {server_id(name), node()})
+        :ra.add_member(Server.id(name, existing_node), Server.id(name))
     end
 
     :ok = :pg.join(pg_scope, @pg_group, self())
@@ -62,14 +63,5 @@ defmodule Ragistry.Cluster do
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
     # TODO Handle member down - could trigger re-election/recovery
     {:noreply, state}
-  end
-
-  defp server_id(registry_name) do
-    server_id(registry_name, node())
-  end
-
-  defp server_id(registry_name, node) when is_atom(node) do
-    (Atom.to_string(node) <> "_" <> Atom.to_string(registry_name))
-    |> String.to_atom()
   end
 end
