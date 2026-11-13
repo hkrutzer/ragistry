@@ -197,7 +197,11 @@ defmodule Ragistry.Machine do
 
   # Used by Ragistry.Machine.count/1
   def apply(_meta, {:count}, state) do
-    count = map_size(state.entries)
+    count =
+      Enum.reduce(state.entries, 0, fn {_key, entries}, total ->
+        total + length(entries)
+      end)
+
     {state, count, []}
   end
 

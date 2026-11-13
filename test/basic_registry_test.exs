@@ -127,6 +127,16 @@ defmodule Ragistry.BasicRegistryTest do
     assert 2 == Ragistry.count(name)
   end
 
+  test "count counts multiple registrations under the same key" do
+    name = :test_registry_duplicate_count
+    {:ok, _pid} = Ragistry.start_link(name: name, type: :duplicate)
+
+    assert :ok == Ragistry.register(name, :key, :value1)
+    assert :ok == Ragistry.register(name, :key, :value2)
+
+    assert 2 == Ragistry.count(name)
+  end
+
   test "count_match returns number of matches" do
     name = :test_registry_count_match
     {:ok, _pid} = Ragistry.start_link(name: name, type: :duplicate)
