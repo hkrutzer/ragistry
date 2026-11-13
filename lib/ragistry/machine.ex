@@ -277,8 +277,7 @@ defmodule Ragistry.Machine do
 
   # Used by Ragistry.Machine.meta/2
   def apply(_meta, {:get_meta, key}, state) do
-    value = Map.get(state.meta, key)
-    {state, value, []}
+    {state, Map.fetch(state.meta, key), []}
   end
 
   # Used by Ragistry.Machine.put_meta/3

@@ -270,18 +270,18 @@ defmodule Ragistry.BasicRegistryTest do
 
     # Test putting and getting meta
     assert :ok == Ragistry.put_meta(name, :counter, 1)
-    assert 1 == Ragistry.meta(name, :counter)
+    assert {:ok, 1} == Ragistry.meta(name, :counter)
 
     # Test updating existing meta
     assert :ok == Ragistry.put_meta(name, :counter, 2)
-    assert 2 == Ragistry.meta(name, :counter)
+    assert {:ok, 2} == Ragistry.meta(name, :counter)
 
     # Test getting non-existent meta
-    assert nil == Ragistry.meta(name, :nonexistent)
+    assert :error == Ragistry.meta(name, :nonexistent)
 
     # Test deleting meta
     assert :ok == Ragistry.delete_meta(name, :counter)
-    assert nil == Ragistry.meta(name, :counter)
+    assert :error == Ragistry.meta(name, :counter)
 
     # Test deleting non-existent meta
     assert :ok == Ragistry.delete_meta(name, :nonexistent)
@@ -293,6 +293,7 @@ defmodule Ragistry.BasicRegistryTest do
 
     test_values = [
       {:atom_key, :atom_value},
+      {:nil_key, nil},
       {:string_key, "string value"},
       {:number_key, 12345},
       {:tuple_key, {1, 2, 3}},
@@ -302,7 +303,7 @@ defmodule Ragistry.BasicRegistryTest do
 
     for {key, value} <- test_values do
       assert :ok == Ragistry.put_meta(name, key, value)
-      assert value == Ragistry.meta(name, key)
+      assert {:ok, value} == Ragistry.meta(name, key)
     end
   end
 
