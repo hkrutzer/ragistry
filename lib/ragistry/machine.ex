@@ -235,7 +235,7 @@ defmodule Ragistry.Machine do
         |> Enum.map(fn {pid, value} -> {key, pid, value} end)
         |> :ets.match_spec_run(compiled_ms)
       end)
-      |> length()
+      |> Enum.count(&(&1 === true))
 
     {state, count, []}
   end

@@ -185,6 +185,17 @@ defmodule Ragistry.BasicRegistryTest do
              ])
   end
 
+  test "count_select counts only results equal to true" do
+    name = :test_registry_count_select_true
+    start_supervised!({Ragistry, name: name, keys: :duplicate})
+
+    for value <- [true, false, :other, 1] do
+      assert :ok == Ragistry.register(name, :key, value)
+    end
+
+    assert 1 == Ragistry.count_select(name, [{{:_, :_, :"$1"}, [], [:"$1"]}])
+  end
+
   test "match supports patterns and guards" do
     name = :test_registry_match
     start_supervised!({Ragistry, name: name, keys: :unique})
