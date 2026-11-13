@@ -244,9 +244,10 @@ defmodule Ragistry.Machine do
   # Used by Ragistry.Machine.keys/2
   def apply(_meta, {:keys, pid}, state) do
     keys =
-      state.entries
-      |> Enum.filter(fn {_k, entries} -> Enum.any?(entries, fn {p, _} -> p == pid end) end)
-      |> Enum.map(fn {k, _} -> k end)
+      for {key, entries} <- state.entries,
+          {entry_pid, _value} <- entries,
+          entry_pid == pid,
+          do: key
 
     {state, keys, []}
   end

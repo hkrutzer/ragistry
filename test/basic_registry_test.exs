@@ -194,6 +194,16 @@ defmodule Ragistry.BasicRegistryTest do
     assert ["key1", "key2"] == Ragistry.keys(name, self()) |> Enum.sort()
   end
 
+  test "keys preserves repeated keys for the same registrant in duplicate mode" do
+    name = :test_registry_duplicate_keys
+    {:ok, _pid} = Ragistry.start_link(name: name, type: :duplicate)
+
+    assert :ok == Ragistry.register(name, :c, -28)
+    assert :ok == Ragistry.register(name, :c, 9)
+
+    assert [:c, :c] == Ragistry.keys(name, self())
+  end
+
   test "values returns all values for a key and pid" do
     name = :test_registry_values
     {:ok, _pid} = Ragistry.start_link(name: name)
