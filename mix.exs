@@ -29,6 +29,7 @@ defmodule Ragistry.MixProject do
     [
       {:ra, "~> 3.2"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:stream_data, "~> 1.4", only: :test},
       {:ex_unit_cluster, "~> 0.7.0", only: :test}
     ]
   end

@@ -10,4 +10,5 @@
   "nimble_parsec": {:hex, :nimble_parsec, "1.4.2", "8efba0122db06df95bfaa78f791344a89352ba04baedd3849593bfce4d0dc1c6", [:mix], [], "hexpm", "4b21398942dda052b403bbe1da991ccd03a053668d147d53fb8c4e0efe09c973"},
   "ra": {:hex, :ra, "3.2.0", "7e496fcdcdc991f489d4599084aa10ee6e036c12ca8abbab345afa7bbdc2dd1c", [:rebar3], [{:aten, "0.6.0", [hex: :aten, repo: "hexpm", optional: false]}, {:gen_batch_server, "0.10.0", [hex: :gen_batch_server, repo: "hexpm", optional: false]}, {:seshat, "1.0.1", [hex: :seshat, repo: "hexpm", optional: false]}], "hexpm", "8542b71af2fad6b4e92b98c2092beebb6e51e1cada9d51d6d4bb1cdca3dbcd06"},
   "seshat": {:hex, :seshat, "1.0.1", "fa7a8e89218d19394f7ddc47ba6725471103d654cd0bd0a98e5fdd922a943eac", [:rebar3], [], "hexpm", "38324fe8c5782c69d73b334dd00b20e16c0d99eef3e7b4005c519fe9bc0e34fc"},
+  "stream_data": {:hex, :stream_data, "1.4.0", "026f929db613aabea6208012ae9b8970d3fd5f88b3bdf26831bc536f98c42036", [:mix], [], "hexpm", "2b0ee3a340dcce1c8cf6302a763ee757d1e01c54d6e16d9069062509d68b1dc9"},
 }
